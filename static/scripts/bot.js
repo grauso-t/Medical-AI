@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function addLoadingMessage() {
         const loadingDiv = document.createElement("div");
         loadingDiv.classList.add("bot-message", "loading-message");
-        loadingDiv.innerHTML = '<img src="../static/images/loading.gif" alt="Loading..." width="50">';
+        loadingDiv.innerHTML = '<div class="loader-dot"></div>';
         chatBody.appendChild(loadingDiv);
         
         chatBody.scrollTop = chatBody.scrollHeight;

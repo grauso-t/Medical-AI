@@ -28,14 +28,14 @@
         <div class="container-patient">
             <p>Patients</p>
             <div class="loading-image" style="display: none;">
-                <img src="../static/images/loading.gif" alt="Loading..." />
+                <div class="loader"></div>
             </div>                     
             <div id="container-patient"></div>
         </div>
         <div class="container-observation">
             <p>Observations</p>
             <div class="loading-image" style="display: none;">
-                <img src="../static/images/loading.gif" alt="Loading..." />
+                <div class="loader"></div>
             </div> 
             <div id="container-observation"></div>
         </div>
@@ -60,62 +60,6 @@
         </div>
     </div>
 
-    <script>
-        function showLoading() {
-            var loadingImages = document.getElementsByClassName('loading-image');
-            for (var i = 0; i < loadingImages.length; i++) {
-                loadingImages[i].style.display = 'block';
-            }
-        }
-    
-        function hideLoading() {
-            var loadingImages = document.getElementsByClassName('loading-image');
-            for (var i = 0; i < loadingImages.length; i++) {
-                loadingImages[i].style.display = 'none';
-            }
-        }
-    
-        function fetchData() {
-            showLoading(); // Mostra l'immagine di caricamento prima di effettuare la richiesta
-            fetch('/loadata')
-                .then(response => response.json())
-                .then(data => {
-                    hideLoading(); // Nascondi l'immagine di caricamento quando i dati sono pronti
-                    console.log(data);
-                    
-                    var observationDataDiv = document.getElementById('container-observation');
-                    data.observation.forEach(function(item) {
-                        var observationDiv = document.createElement('div');
-                        observationDiv.innerHTML = `
-                            <p><strong>Observation ID:</strong> ${item['Observation ID']}</p>
-                            <p><strong>Insertion Date:</strong> ${item['Insertion Date']}</p>
-                            <p><strong>Observation Code (LOINC):</strong> ${item['Observation Code (LOINC)']}</p>
-                            <hr>
-                        `;
-                        observationDataDiv.appendChild(observationDiv);
-                    });
-    
-                    var patientDataDiv = document.getElementById('container-patient');
-                    data.patient.forEach(function(items) {
-                        var patientDiv = document.createElement('div');
-                        patientDiv.innerHTML = `
-                            <p><strong>Patient ID:</strong> ${items['Patient ID']}</p>
-                            <p><strong>Birth Date:</strong> ${items['Birth Date']}</p>
-                            <p><strong>Gender:</strong> ${items['Gender']}</p>
-                            <hr>
-                        `;
-                        patientDataDiv.appendChild(patientDiv);
-                    });
-                })
-                .catch(error => {
-                    hideLoading(); // Assicurati che l'immagine di caricamento venga nascosta anche in caso di errore
-                    console.error('Errore:', error)
-                });
-        }
-    
-        // Chiama la funzione fetchData per ottenere i dati
-        fetchData();
-    </script>
 </body>
 
 </html>

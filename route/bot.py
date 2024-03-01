@@ -151,6 +151,8 @@ def process_data_llm(data):
     logger.info("LLAMA processing")
     bot_response = ""
     
+    prompt = "You are a translator of JSON code into natural language sentences, eliminating unnecessary attributes. "
+    
     # Initialize the LLAMA language model
     llm = LlamaCpp(
         model_path=f"models\\mistral-7b-openorca.Q6_K.gguf",
@@ -171,7 +173,7 @@ def process_data_llm(data):
 
             # Process each entry using LLAMA and concatenate responses
             for entry in entries:
-                llm_responses = llm("You are a translator of JSON code into natural language sentences, eliminating unnecessary attributes. " + str(entry))
+                llm_responses = llm.invoke(prompt + str(entry))
                 logger.debug("LLAMA: %s", llm_responses)
                 bot_response = bot_response + llm_responses + "<br><br>"
             
@@ -180,7 +182,7 @@ def process_data_llm(data):
         else:
             # If no "entry" attribute, process the entire data using LLAMA
             remove_value_sampled_data(data)
-            llm_responses = llm("You are a translator of JSON code into natural language sentences, eliminating unnecessary attributes. " + str(data))
+            llm_responses = llm.invoke(prompt + str(data))
             logger.debug("LLAMA: %s", llm_responses)
             # Create a response JSON with LLAMA-processed information
             return jsonify({"bot_message": llm_responses})
