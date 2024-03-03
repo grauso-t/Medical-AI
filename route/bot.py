@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, render_template, session
+from flask import Blueprint, request, jsonify, render_template, session, Response
 from dotenv import load_dotenv
 from openai import OpenAI
 from langchain_community.llms import LlamaCpp
@@ -94,7 +94,7 @@ def extract_effectiveInstant_and_valueQuantity(data):
     logger.info("Extract effectiveInstant and valueQuantity")
     try:
         # Extract effectiveInstants from FHIR data entries
-        effectiveInstants = [entry["resource"]["effectiveInstant"] for entry in data["entry"]]
+        effectiveInstants = [entry["resource"]["effectiveInstant"] if "effectiveInstant" in entry["resource"] else entry["resource"]["effectivePeriod"]["start"] for entry in data["entry"]]
         
         # Combine valueQuantity information into a formatted string
         combined_values = [
@@ -151,8 +151,8 @@ def process_data_llm(data):
     logger.info("LLAMA processing")
     bot_response = ""
     
-    prompt = "You are a translator of JSON code into natural language sentences, eliminating unnecessary attributes. "
-    
+    prompt = "You are a translator of JSON code into natural language sentences, eliminating unnecessary attributes and provide only the generete sentence. Example of response: 'The name of patient 1234 is Jhon'. This is the JSON: "
+
     # Initialize the LLAMA language model
     llm = LlamaCpp(
         model_path=f"models\\mistral-7b-openorca.Q6_K.gguf",
@@ -161,7 +161,7 @@ def process_data_llm(data):
         n_ctx=2048,
         top_p=1,
         n_threads=8,
-        verbose=True
+        verbose=True,
     )
 
     try:
@@ -176,16 +176,15 @@ def process_data_llm(data):
                 llm_responses = llm.invoke(prompt + str(entry))
                 logger.debug("LLAMA: %s", llm_responses)
                 bot_response = bot_response + llm_responses + "<br><br>"
-            
             # Create a response JSON with LLAMA-processed information
-            return jsonify({"bot_message": bot_response})
+            return jsonify({"bot_message": bot_response.replace("Here's the translation: ", "")})
         else:
             # If no "entry" attribute, process the entire data using LLAMA
             remove_value_sampled_data(data)
             llm_responses = llm.invoke(prompt + str(data))
             logger.debug("LLAMA: %s", llm_responses)
             # Create a response JSON with LLAMA-processed information
-            return jsonify({"bot_message": llm_responses})
+            return jsonify({"bot_message": llm_responses.replace("Here's the translation: ", "")})
     except KeyError as e:
         # Log an error message if key extraction fails
         logger.error(f"KeyError in process_data_llm: {e}")
