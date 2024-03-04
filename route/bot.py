@@ -96,6 +96,8 @@ def extract_effectiveInstant_and_valueQuantity(data):
         # Extract effectiveInstants from FHIR data entries
         effectiveInstants = [entry["resource"]["effectiveInstant"] if "effectiveInstant" in entry["resource"] else entry["resource"]["effectivePeriod"]["start"] for entry in data["entry"]]
         
+        formatted_dates = [utils.format_date(date_str) for date_str in effectiveInstants]
+        
         # Combine valueQuantity information into a formatted string
         combined_values = [
             f"{entry['resource']['valueQuantity']['value']} {entry['resource']['valueQuantity']['unit']}"
@@ -103,7 +105,7 @@ def extract_effectiveInstant_and_valueQuantity(data):
         ]
 
         # Create a response JSON with extracted information
-        response_data = {"bot_message": "graph", "dates": effectiveInstants, "values": combined_values}
+        response_data = {"bot_message": "graph", "dates": formatted_dates, "values": combined_values}
         return jsonify(response_data)
     except KeyError as e:
         # Log an error message if key extraction fails
@@ -145,51 +147,6 @@ def extract_period_and_data(data):
         logger.error(f"KeyError in extract_period_and_data: {e}")
         return False
 
-# Function to process FHIR data using LLAMA language model
-def process_data_llm(data):
-    # Log information about the LLAMA processing
-    logger.info("LLAMA processing")
-    bot_response = ""
-    
-    prompt = "You are a translator of JSON code into natural language sentences, eliminating unnecessary attributes and provide only the generete sentence. Example of response: 'The name of patient 1234 is Jhon'. This is the JSON: "
-
-    # Initialize the LLAMA language model
-    llm = LlamaCpp(
-        model_path=f"models\\mistral-7b-openorca.Q6_K.gguf",
-        temperature=0,
-        max_tokens=1000,
-        n_ctx=2048,
-        top_p=1,
-        n_threads=8,
-        verbose=True,
-    )
-
-    try:
-        # Check if FHIR data has "entry" attribute
-        if "entry" in data:
-            entries = data["entry"]
-            # Remove specific attributes from entries
-            remove_value_sampled_data(entries)
-
-            # Process each entry using LLAMA and concatenate responses
-            for entry in entries:
-                llm_responses = llm.invoke(prompt + str(entry))
-                logger.debug("LLAMA: %s", llm_responses)
-                bot_response = bot_response + llm_responses + "<br><br>"
-            # Create a response JSON with LLAMA-processed information
-            return jsonify({"bot_message": bot_response.replace("Here's the translation: ", "")})
-        else:
-            # If no "entry" attribute, process the entire data using LLAMA
-            remove_value_sampled_data(data)
-            llm_responses = llm.invoke(prompt + str(data))
-            logger.debug("LLAMA: %s", llm_responses)
-            # Create a response JSON with LLAMA-processed information
-            return jsonify({"bot_message": llm_responses.replace("Here's the translation: ", "")})
-    except KeyError as e:
-        # Log an error message if key extraction fails
-        logger.error(f"KeyError in process_data_llm: {e}")
-        return jsonify({"bot_message": f"KeyError: {str(e)}"})
-
 # Function to remove specific attributes from FHIR data
 def remove_value_sampled_data(json_data):
     # Recursive function to remove "valueSampledData" attributes
@@ -230,10 +187,10 @@ def chat():
                 if not extract:
                     extract = extract_period_and_data(data)
                 if not extract:
-                    return process_data_llm(data)
+                    return jsonify({"bot_message": "stream", "data": data})
                 return extract
             else:
-                return process_data_llm(data)
+                return jsonify({"bot_message": "stream", "data": data})
             
         elif response.status_code == 404:
             return jsonify({"bot_message": "The information you have requested is not available."})
@@ -243,3 +200,67 @@ def chat():
         
     else:
         return render_template("login.html")
+    
+@bot_blueprint.route("/stream", methods=["GET", "POST"])
+def stream():
+    data = request.json.get("data")
+    # Function to process FHIR data using LLAMA language model
+    def process_data_llm(data):
+        # Log information about the LLAMA processing
+        logger.info("LLAMA processing")
+    
+        prompt = "You are a translator of JSON code into natural language sentences, eliminating unnecessary attributes and provide only the generete sentence. Example of response: 'The name of patient 1234 is Jhon'. This is the JSON: "    
+    
+        # Initialize the LLAMA language model
+        llm = LlamaCpp(
+            model_path=f"models\\mistral-7b-openorca.Q6_K.gguf",
+            temperature=0,
+            max_tokens=1000,
+            n_ctx=2048,
+            top_p=1,
+            n_threads=8,
+            verbose=True,
+        )
+
+        try:
+            
+            buffer = ""
+            count = 0;
+            # Check if FHIR data has "entry" attribute
+            if "entry" in data:
+                entries = data["entry"]
+                # Remove specific attributes from entries
+                remove_value_sampled_data(entries)
+
+                # Process each entry using LLAMA and concatenate responses
+                for entry in entries:           
+                    for chunk in llm.stream(prompt + str(entry)):
+                        print(chunk, end="", flush=True)
+                        count += 1
+                        if count > 8:
+                            buffer += chunk
+                            yield str(buffer.replace("Here is the translation: ", ""))
+                            buffer = ""
+                            count = 0
+                        else:
+                            buffer += chunk
+                    yield "<br><br>"
+                    buffer = ""
+            else:
+                # If no "entry" attribute, process the entire data using LLAMA
+                remove_value_sampled_data(data)
+                for chunk in llm.stream(prompt + str(data)):
+                    print(chunk, end="", flush=True)
+                    count += 1
+                    if count > 8:
+                        buffer += chunk
+                        yield str(buffer.replace("Here is the translation: ", ""))
+                        buffer = ""
+                        count = 0
+                    else:
+                        buffer += chunk
+        except KeyError as e:
+            # Log an error message if key extraction fails
+            logger.error(f"KeyError in process_data_llm: {e}")
+            return jsonify({"bot_message": f"KeyError: {str(e)}"})
+    return Response(process_data_llm(data), mimetype='text/plain')

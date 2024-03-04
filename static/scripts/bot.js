@@ -1,19 +1,19 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
     const jqueryScript = document.createElement('script');
     jqueryScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js';
-    jqueryScript.onload = function() {
-        $(".chat-button").click(function(){
+    jqueryScript.onload = function () {
+        $(".chat-button").click(function () {
             $(".chat-container").slideDown();
             $(".chat-button").hide();
         });
 
-        $(".close-button").click(function(){
+        $(".close-button").click(function () {
             $(".chat-container").slideUp();
             $(".chat-button").show();
         });
     };
     document.head.appendChild(jqueryScript);
-        
+
     const chartScript = document.createElement('script');
     chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js';
     document.head.appendChild(chartScript);
@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function() {
         chatBody.appendChild(messageDiv);
 
         chatBody.scrollTop = chatBody.scrollHeight;
+        return messageDiv;
     }
 
     function createChart(dates, values) {
@@ -101,7 +102,8 @@ document.addEventListener("DOMContentLoaded", function() {
         loadingDiv.classList.add("bot-message", "loading-message");
         loadingDiv.innerHTML = '<div class="loader-dot"></div>';
         chatBody.appendChild(loadingDiv);
-        
+        disableInputAndButton();
+
         chatBody.scrollTop = chatBody.scrollHeight;
     }
 
@@ -109,6 +111,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const loadingMessage = document.querySelector(".loading-message");
         if (loadingMessage) {
             loadingMessage.remove();
+            enableInputAndButton();
         }
     }
 
@@ -124,7 +127,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function sendMessageToServer(message) {
         addLoadingMessage();
-        disableInputAndButton();
 
         fetch('/chat', {
             method: 'POST',
@@ -133,38 +135,39 @@ document.addEventListener("DOMContentLoaded", function() {
             },
             body: JSON.stringify({ user_message: message }),
         })
-        .then(response => response.json())
-        .then(data => {
-            removeLoadingMessage();
-
-            if (data.hasOwnProperty('error')) {
-                addMessage('bot', `Error: ${data.error}`);
-            } else {
-                const botResponse = data.bot_message;
-                if (botResponse === "graph") {
-                    if (data.hasOwnProperty('dates') && data.hasOwnProperty('values')) {
-                        createChart(data.dates, data.values);
-                    } else {
-                        addMessage('bot', 'Graph data is missing.');
+            .then(response => response.json())
+            .then(data => {
+                if (data.hasOwnProperty('error')) {
+                    addMessage('bot', `Error: ${data.error}`);
+                    removeLoadingMessage();
+                } else {
+                    const botResponse = data.bot_message;
+                    if (botResponse === "graph") {
+                        if (data.hasOwnProperty('dates') && data.hasOwnProperty('values')) {
+                            createChart(data.dates, data.values);
+                            removeLoadingMessage();
+                        } else {
+                            addMessage('bot', 'Graph data is missing.');
+                            removeLoadingMessage();
+                        }
+                    }
+                    else if (botResponse === "stream") {
+                        startStreaming(data.data);
+                    }
+                    else {
+                        removeLoadingMessage();
+                        addMessage('bot', botResponse);
                     }
                 }
-                else {
-                    addMessage('bot', botResponse);
-                }
-            }
-
-            enableInputAndButton();
-        })
-        .catch(error => {
-            console.error('Error sending message:', error);
-            removeLoadingMessage();
-            addMessage('bot', 'An error occurred while communicating with the server.');
-
-            enableInputAndButton();
-        });
+            })
+            .catch(error => {
+                console.error('Error sending message:', error);
+                removeLoadingMessage();
+                addMessage('bot', 'An error occurred while communicating with the server.');
+            });
     }
 
-    document.querySelector(".input-button").addEventListener("click", function() {
+    document.querySelector(".input-button").addEventListener("click", function () {
         const userMessage = inputField.value;
         if (userMessage.trim() !== "") {
             addMessage('user', userMessage);
@@ -173,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    inputField.addEventListener("keyup", function(event) {
+    inputField.addEventListener("keyup", function (event) {
         if (event.key === "Enter") {
             const userMessage = inputField.value;
             if (userMessage.trim() !== "") {
@@ -183,4 +186,42 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     });
+
+    function startStreaming(data) {
+
+        // Send POST request to Flask endpoint with data
+        fetch('/stream', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json' // Specify content type as JSON
+            },
+            body: JSON.stringify({ data: data }), // Include data in the request body
+        })
+        .then(response => {
+            removeLoadingMessage();
+            disableInputAndButton();
+            text = "";
+            message = addMessage("bot", "");
+            // ReadableStream to consume data
+            const reader = response.body.getReader();
+            // Function to continuously read data
+            function read() {
+                reader.read().then(({ done, value }) => {
+                    // If stream ends, exit
+                    if (done) {
+                        enableInputAndButton();
+                        return;
+                    }
+                    // Append data to container
+                    text = text + (new TextDecoder().decode(value));
+                    message.innerHTML = `<div class="message">${text}</div>`;
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                    read();
+                });
+            }
+            // Start reading data
+            read();
+        })
+        .catch(error => console.error('Error:', error));
+    }
 });
