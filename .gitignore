@@ -2,3 +2,4 @@ venv
 models/mistral-7b-openorca.Q6_K.gguf
 .env
 route/__pycache__
+static/database/accounts.json

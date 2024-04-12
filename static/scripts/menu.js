@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", function () {
             { text: "Appointments", link: "#Appointments", icon: "fas fa-calendar-check" },
             { text: "Patients", link: "#Patients", icon: "fas fa-hospital-user" },
             { text: "Observation", link: "#Observation", icon: "fas fa-clipboard" },
-            { text: "Account", link: "#Account", icon: "fas fa-user" },
+            { text: "Account", link: "/account", icon: "fas fa-user" },
             { text: "", link: "/logout", icon: "fas fa-right-from-bracket" },
         ];
     

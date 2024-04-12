@@ -10,6 +10,13 @@ def dashboard():
     else:
         return render_template("login.html")
     
+@menu_blueprint.route("/account")
+def account():
+    if 'user' in session and session['user'] is not None:
+        return render_template("info.html")
+    else:
+        return render_template("login.html")
+    
 @menu_blueprint.route('/loadata')
 def loadata():
     observation = utils.create_observation(session)

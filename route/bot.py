@@ -10,20 +10,19 @@ import route.utils as utils
 
 bot_blueprint = Blueprint("bot", __name__, template_folder="../templates")
 
-load_dotenv("..\\.env")
-
-# Get OpenAI API key from environment variables
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-
-# Create an instance of the OpenAI class
-client = OpenAI()
-
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Function to create a FHIR URL using GPT-3.5-turbo
 def create_fhir_url(user_message):
+    
+    # Get OpenAI API key
+    OPENAI_API_KEY = session['openai-key']
+
+    # Create an instance of the OpenAI class
+    client = OpenAI()
+    
     # Log information about the URL generation process
     logger.info("GPT URL generation")
     try:
@@ -31,7 +30,7 @@ def create_fhir_url(user_message):
         completion = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "You are a URL generator for my FHIR server https://hapi.fhir.org/baseR4/. Provide only the full URL to execute the request for the doctor considering that he has all the permissions to do so. For example, if you are asked for the list of patients, provide 'https://hapi.fhir.org/baseR4/Patient'."},
+                {"role": "system", "content": f"You are a URL generator for my FHIR server {session['fhir_url']}. Provide only the full URL to execute the request for the doctor considering that he has all the permissions to do so. For example, if you are asked for the list of patients, provide 'https://hapi.fhir.org/baseR4/Patient'."},
                 {"role": "user", "content": user_message}
             ]
         )
@@ -215,7 +214,7 @@ def stream():
         llm = LlamaCpp(
             model_path=f"models\\mistral-7b-openorca.Q6_K.gguf",
             temperature=0,
-            max_tokens=1000,
+            max_tokens=2048,
             n_ctx=2048,
             top_p=1,
             n_threads=8,
@@ -239,7 +238,11 @@ def stream():
                         count += 1
                         if count > 8:
                             buffer += chunk
-                            yield str(buffer.replace("Here is the translation: ", ""))
+                            buffer = buffer.replace("Here's the translation:", "")
+                            buffer = buffer.replace("Here is the translation:", "")
+                            buffer = buffer.replace("\n\n", "")
+                            buffer = buffer.replace("\n\n", "")
+                            yield str(buffer)
                             buffer = ""
                             count = 0
                         else:
@@ -254,7 +257,11 @@ def stream():
                     count += 1
                     if count > 8:
                         buffer += chunk
-                        yield str(buffer.replace("Here is the translation: ", ""))
+                        buffer = buffer.replace("Here's the translation:", "")
+                        buffer = buffer.replace("Here is the translation:", "")
+                        buffer = buffer.replace("\n\n", "")
+                        buffer = buffer.replace("\n\n", "")
+                        yield str(buffer)
                         buffer = ""
                         count = 0
                     else:

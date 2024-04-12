@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>info</title>
+    <link rel="stylesheet" href="../static/style/menu.css">
+    <link rel="stylesheet" href="../static/style/general.css">
+    <link rel="stylesheet" href="../static/style/dashboard.css">
+    <link rel="stylesheet" href="../static/style/info.css">
+    <script src="../static/scripts/menu.js"></script>
+    <script src="../static/scripts/dashboard.js"></script>
+    <script src="../static/scripts/bot.js"></script>
+</head>
+
+<body>
+
+    <div class="navbar" id="navbar">
+        <!-- Navigation items will be added dynamically here -->
+    </div> 
+
+    <form class="info-form" action="/info_form" method="POST">
+        <label for="username" class="info-label">Username:</label>
+        <input type="text" id="username" name="username" class="info-input" placeholder="{{ session['user'] }}" value="{{ session['user'] }}" disabled>
+        
+        <label for="password" class="info-label">Password:</label>
+        <input type="password" id="password" name="password" class="info-input" required>
+        
+        <label for="fhir_url" class="info-label">FHIR URL:</label>
+        <input type="url" id="fhir_url" name="fhir_url" class="info-input" placeholder="{{ session['fhir_url'] }}" value="{{ session['fhir_url'] }}" required>
+        
+        <label for="openai-key" class="info-label">OpenAI Key:</label>
+        <input type="text" id="openai-key" name="openai-key" class="info-input" placeholder="{{ session['openai-key'] }}" value="{{ session['openai-key'] }}" required>
+        
+        <button type="submit" class="info-button">Submit</button>
+    </form>
+
+</body>
+
+</html>

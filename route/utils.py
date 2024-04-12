@@ -14,14 +14,25 @@ def create_observation(session):
                 observation = entry['resource']
                 obs_id = observation['id']
                 insertion_date = format_date(observation['meta']['lastUpdated'])
-                observation_code = observation['code']['coding'][0]['code']
                 
-                observation_info = {
-                    "Observation ID": obs_id,
-                    "Insertion Date": insertion_date,
-                    "Observation Code (LOINC)": observation_code
-                }
-                observations.append(observation_info)
+                if 'component' in observation:
+                    observation_code = observation['component'][0]['code']['coding'][0]['system']
+                    
+                    observation_info = {
+                        "Observation ID": obs_id,
+                        "Insertion Date": insertion_date,
+                        "Observation Code (LOINC)": observation_code
+                    }
+                    observations.append(observation_info)
+                else:
+                    observation_code = observation['code']['coding'][0]['code']
+                
+                    observation_info = {
+                        "Observation ID": obs_id,
+                        "Insertion Date": insertion_date,
+                        "Observation Code (LOINC)": observation_code
+                    }
+                    observations.append(observation_info)
                 
             return observations
     except requests.exceptions.RequestException as e:
@@ -40,9 +51,12 @@ def create_patient(session):
 
             for entry in json_data['entry']:
                 patient = entry['resource']
-                ptn_id = patient['id']
-                birthDate = patient['birthDate']
-                gender = patient['gender']
+                ptn_id = patient.get('id', 'Not defined')
+                birthDate = patient.get('birthDate', 'Not defined')
+                gender = patient.get('gender', 'Not defined')
+                
+                print(ptn_id)
+                print(birthDate)
                 
                 patient_info = {
                     "Patient ID": ptn_id,
