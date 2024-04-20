@@ -3,7 +3,6 @@ import route.login as login
 import route.menu as menu
 import route.bot as bot
 import os
-import route.utils as utils
 
 app = Flask(__name__, template_folder="../templates")
 app.register_blueprint(login.login_blueprint)

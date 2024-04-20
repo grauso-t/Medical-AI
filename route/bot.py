@@ -2,9 +2,9 @@ from flask import Blueprint, request, jsonify, render_template, session, Respons
 from dotenv import load_dotenv
 from openai import OpenAI
 from langchain_community.llms import LlamaCpp
+from langchain_core.prompts import ChatPromptTemplate
 import requests
 import re
-import os
 import logging
 import route.utils as utils
 
@@ -208,13 +208,64 @@ def stream():
         # Log information about the LLAMA processing
         logger.info("LLAMA processing")
     
-        prompt = "You are a translator of JSON code into natural language sentences, eliminating unnecessary attributes and provide only the generete sentence. Example of response: 'The name of patient 1234 is Jhon'. This is the JSON: "    
+        patient_data = """{
+            "resourceType": "Patient",
+            "id": "example",
+            "identifier": [
+                {
+                    "value": "12345"
+                },
+                {
+                    "system": "http://hospital.com/ssn",
+                }
+            ],
+            "name": [
+                {
+                    "family": "Doe",
+                    "given": [
+                        "John",
+                        "Adam"
+                    ]
+                }
+            ],
+            "gender": "male",
+            "birthDate": "1974-12-25",
+            "address": [
+                {
+                    "use": "home",
+                    "line": [
+                        "123 Main St",
+                        "Apt 101"
+                    ],
+                    "city": "Anytown",
+                    "state": "NY",
+                    "postalCode": "12345",
+                    "country": "USA"
+                }
+            ],
+            "telecom": [
+                {
+                    "system": "phone",
+                    "value": "555-555-5555",
+                    "use": "home"
+                }
+            ]
+        }"""
+    
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", "You are a translator of JSON code into natural language sentences, eliminating unnecessary attributes and provide only the generete sentence."),
+                ("user", "{patient_data}"),
+                ("assistant", "The identifier of this patient within the hospital system is '12345'. His name is John Adam Doe, he is male and was born on 25 December 1974. He can be contacted at home on 555-555-5555."),
+                ("user", "{json}"),
+            ]
+        )
     
         # Initialize the LLAMA language model
         llm = LlamaCpp(
-            model_path=f"models\\mistral-7b-openorca.Q6_K.gguf",
+            model_path=f"""./models/mistral-7b-openorca.Q6_K.gguf""",
             temperature=0,
-            max_tokens=2048,
+            max_tokens=500,
             n_ctx=2048,
             top_p=1,
             n_threads=8,
@@ -222,50 +273,57 @@ def stream():
         )
 
         try:
-            
             buffer = ""
-            count = 0;
             # Check if FHIR data has "entry" attribute
             if "entry" in data:
                 entries = data["entry"]
                 # Remove specific attributes from entries
                 remove_value_sampled_data(entries)
-
                 # Process each entry using LLAMA and concatenate responses
-                for entry in entries:           
-                    for chunk in llm.stream(prompt + str(entry)):
+                for entry in entries:     
+                    count = 0;      
+                    for chunk in llm.stream(prompt.format_messages(json=str(entry), patient_data=str(patient_data))):
                         print(chunk, end="", flush=True)
                         count += 1
-                        if count > 8:
+                        if count == 8:
                             buffer += chunk
                             buffer = buffer.replace("Here's the translation:", "")
                             buffer = buffer.replace("Here is the translation:", "")
+                            buffer = buffer.replace("}}", "")
+                            buffer = buffer.replace("AI: ", "")
                             buffer = buffer.replace("\n\n", "")
                             buffer = buffer.replace("\n\n", "")
                             yield str(buffer)
                             buffer = ""
-                            count = 0
-                        else:
+                        elif count < 8:
                             buffer += chunk
+                        else:
+                            yield str(chunk)
+                            
                     yield "<br><br>"
                     buffer = ""
             else:
                 # If no "entry" attribute, process the entire data using LLAMA
                 remove_value_sampled_data(data)
-                for chunk in llm.stream(prompt + str(data)):
+                count = 0
+                for chunk in llm.stream(prompt.format_messages(json=str(data), patient_data=str(patient_data))):
                     print(chunk, end="", flush=True)
                     count += 1
-                    if count > 8:
+                    if count == 8:
                         buffer += chunk
                         buffer = buffer.replace("Here's the translation:", "")
                         buffer = buffer.replace("Here is the translation:", "")
+                        buffer = buffer.replace("}}", "")
+                        buffer = buffer.replace("AI: ", "")
                         buffer = buffer.replace("\n\n", "")
                         buffer = buffer.replace("\n\n", "")
                         yield str(buffer)
                         buffer = ""
-                        count = 0
+                    elif count < 8:
+                            buffer += chunk
                     else:
-                        buffer += chunk
+                        yield str(chunk)
+
         except KeyError as e:
             # Log an error message if key extraction fails
             logger.error(f"KeyError in process_data_llm: {e}")

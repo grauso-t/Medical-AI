@@ -13,14 +13,14 @@ def create_observation(session):
             for entry in json_data['entry']:
                 observation = entry['resource']
                 obs_id = observation['id']
-                insertion_date = format_date(observation['meta']['lastUpdated'])
+                last_updated = format_date(observation['meta']['lastUpdated'])
                 
                 if 'component' in observation:
                     observation_code = observation['component'][0]['code']['coding'][0]['system']
                     
                     observation_info = {
                         "Observation ID": obs_id,
-                        "Insertion Date": insertion_date,
+                        "Last Updated": last_updated,
                         "Observation Code (LOINC)": observation_code
                     }
                     observations.append(observation_info)
@@ -29,7 +29,7 @@ def create_observation(session):
                 
                     observation_info = {
                         "Observation ID": obs_id,
-                        "Insertion Date": insertion_date,
+                        "Last Updated": last_updated,
                         "Observation Code (LOINC)": observation_code
                     }
                     observations.append(observation_info)

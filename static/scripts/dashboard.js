@@ -56,7 +56,7 @@ function fetchData() {
                 var observationDiv = document.createElement('div');
                 observationDiv.innerHTML = `
                     <p><strong>Observation ID:</strong> ${item['Observation ID']}</p>
-                    <p><strong>Insertion Date:</strong> ${item['Insertion Date']}</p>
+                    <p><strong>Last Updated:</strong> ${item['Last Updated']}</p>
                     <p><strong>Observation Code (LOINC):</strong> ${item['Observation Code (LOINC)']}</p>
                     <hr>
                 `;
