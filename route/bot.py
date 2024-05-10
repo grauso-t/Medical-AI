@@ -260,17 +260,6 @@ def stream():
                 ("user", "{json}"),
             ]
         )
-    
-        # Initialize the LLAMA language model
-        llm = LlamaCpp(
-            model_path=f"""./models/mistral-7b-openorca.Q6_K.gguf""",
-            temperature=0,
-            max_tokens=500,
-            n_ctx=2048,
-            top_p=1,
-            n_threads=8,
-            verbose=True,
-        )
 
         try:
             buffer = ""
@@ -282,6 +271,19 @@ def stream():
                 # Process each entry using LLAMA and concatenate responses
                 for entry in entries:     
                     count = 0;      
+                    
+                    # Initialize the LLAMA language model
+                    llm = LlamaCpp(
+                        model_path=f"""./models/mistral-7b-openorca.Q6_K.gguf""",
+                        temperature=0,
+                        max_tokens=500,
+                        n_ctx=2048,
+                        top_p=1,
+                        n_threads=8,
+                        verbose=True,
+                        f16_kv=True,
+                    )
+                    
                     for chunk in llm.stream(prompt.format_messages(json=str(entry), patient_data=str(patient_data))):
                         print(chunk, end="", flush=True)
                         count += 1
@@ -302,10 +304,25 @@ def stream():
                             
                     yield "<br><br>"
                     buffer = ""
+                    
+                    del llm
             else:
                 # If no "entry" attribute, process the entire data using LLAMA
                 remove_value_sampled_data(data)
                 count = 0
+                
+                # Initialize the LLAMA language model
+                llm = LlamaCpp(
+                    model_path=f"""./models/mistral-7b-openorca.Q6_K.gguf""",
+                    temperature=0,
+                    max_tokens=500,
+                    n_ctx=2048,
+                    top_p=1,
+                    n_threads=8,
+                    verbose=True,
+                    f16_kv=True,
+                )
+                
                 for chunk in llm.stream(prompt.format_messages(json=str(data), patient_data=str(patient_data))):
                     print(chunk, end="", flush=True)
                     count += 1
@@ -323,6 +340,8 @@ def stream():
                             buffer += chunk
                     else:
                         yield str(chunk)
+
+                del llm
 
         except KeyError as e:
             # Log an error message if key extraction fails

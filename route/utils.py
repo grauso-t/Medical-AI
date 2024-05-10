@@ -11,29 +11,35 @@ def create_observation(session):
             observations = []
 
             for entry in json_data['entry']:
-                observation = entry['resource']
-                obs_id = observation['id']
-                last_updated = format_date(observation['meta']['lastUpdated'])
-                
+                observation = entry.get('resource', {})
+                obs_id = observation.get('id', 'Not defined')
+                last_updated = format_date(observation.get('meta', {}).get('lastUpdated', 'Not defined'))
+                reference = observation.get('subject', {}).get('reference', 'Not defined')
+
+                observation_info = {}
+
                 if 'component' in observation:
-                    observation_code = observation['component'][0]['code']['coding'][0]['system']
-                    
+                    observation_code = observation['component'][0]['code'].get('text', 'Not defined')
+
                     observation_info = {
                         "Observation ID": obs_id,
                         "Last Updated": last_updated,
+                        "Reference": reference,
                         "Observation Code (LOINC)": observation_code
                     }
-                    observations.append(observation_info)
                 else:
-                    observation_code = observation['code']['coding'][0]['code']
-                
+                    observation_code = observation.get('code', {}).get('text', 'Not defined')
+
                     observation_info = {
                         "Observation ID": obs_id,
                         "Last Updated": last_updated,
-                        "Observation Code (LOINC)": observation_code
+                        "Reference": reference,
+                        "Observation": observation_code
                     }
-                    observations.append(observation_info)
-                
+
+                observations.append(observation_info)
+                print(observation_info)
+
             return observations
     except requests.exceptions.RequestException as e:
         print("Si è verificato un errore durante la richiesta GET:", e)
@@ -50,21 +56,30 @@ def create_patient(session):
             patients = []
 
             for entry in json_data['entry']:
-                patient = entry['resource']
+                patient = entry.get('resource', {})
                 ptn_id = patient.get('id', 'Not defined')
                 birthDate = patient.get('birthDate', 'Not defined')
                 gender = patient.get('gender', 'Not defined')
-                
-                print(ptn_id)
-                print(birthDate)
-                
+
+                name_info = patient.get("name", [{}])[0]
+                name = " ".join(name_info.get("given", []))
+                surname = name_info.get("family", "")
+
+                if name.strip() == "" and surname.strip() == "":
+                    full_name = "Not found"
+                else:
+                    full_name = name + " " + surname
+
                 patient_info = {
                     "Patient ID": ptn_id,
+                    "Name": full_name,
                     "Birth Date": birthDate,
                     "Gender": gender
                 }
                 patients.append(patient_info)
-                
+
+                print(patient_info)
+
             return patients
     except requests.exceptions.RequestException as e:
         print("Si è verificato un errore durante la richiesta GET:", e)

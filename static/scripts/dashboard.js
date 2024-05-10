@@ -57,7 +57,8 @@ function fetchData() {
                 observationDiv.innerHTML = `
                     <p><strong>Observation ID:</strong> ${item['Observation ID']}</p>
                     <p><strong>Last Updated:</strong> ${item['Last Updated']}</p>
-                    <p><strong>Observation Code (LOINC):</strong> ${item['Observation Code (LOINC)']}</p>
+                    <p><strong>Reference ID:</strong> ${item['Reference']}</p>
+                    <p><strong>Observation Type:</strong> ${item['Observation']}</p>
                     <hr>
                 `;
                 observationDataDiv.appendChild(observationDiv);
@@ -68,6 +69,7 @@ function fetchData() {
                 var patientDiv = document.createElement('div');
                 patientDiv.innerHTML = `
                     <p><strong>Patient ID:</strong> ${items['Patient ID']}</p>
+                    <p><strong>Name:</strong> ${items['Name']}</p>
                     <p><strong>Birth Date:</strong> ${items['Birth Date']}</p>
                     <p><strong>Gender:</strong> ${items['Gender']}</p>
                     <hr>
