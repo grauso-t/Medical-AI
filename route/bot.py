@@ -274,7 +274,7 @@ def stream():
                     
                     # Initialize the LLAMA language model
                     llm = LlamaCpp(
-                        model_path=f"""./models/mistral-7b-openorca.Q6_K.gguf""",
+                        model_path=f"""./models/model.gguf""",
                         temperature=0,
                         max_tokens=500,
                         n_ctx=2048,
@@ -313,7 +313,7 @@ def stream():
                 
                 # Initialize the LLAMA language model
                 llm = LlamaCpp(
-                    model_path=f"""./models/mistral-7b-openorca.Q6_K.gguf""",
+                    model_path=f"""./models/model.gguf""",
                     temperature=0,
                     max_tokens=500,
                     n_ctx=2048,

@@ -1,6 +1,8 @@
 venv
-models/mistral-7b-openorca.Q6_K.gguf
+models/model.gguf
 .env
 route/__pycache__
 static/database/accounts.json
-/static/database
+__pycache__
+paper.py
+bot.py
