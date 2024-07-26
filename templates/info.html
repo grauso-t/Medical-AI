@@ -33,6 +33,12 @@
         <label for="openai-key" class="info-label">OpenAI Key:</label>
         <input type="text" id="openai-key" name="openai-key" class="info-input" placeholder="{{ session['openai-key'] }}" value="{{ session['openai-key'] }}" required>
         
+        <label for="openai-model" class="info-label">OpenAI Model:</label>
+        <select id="openai-model" name="openai-model" class="info-input" required>
+            <option value="gpt-3.5-turbo-0125" {{ 'selected' if session['openai-model'] == 'gpt-3.5-turbo-0125' else '' }}>GPT-3.5-Turbo</option>
+            <option value="gpt-4" {{ 'selected' if session['openai-model'] == 'gpt-4o' else '' }}>GPT-4o</option>
+        </select>        
+
         <button type="submit" class="info-button">Submit</button>
     </form>
 

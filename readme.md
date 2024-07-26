@@ -33,3 +33,6 @@ Di seguito sono presentate alcune possibili risposte da parte dell'assistente vi
 Per utilizzare l'applicazione, basta scaricare le dipendenze elencate nel file 'requirements.txt'.
 
 Successivamente, procedi scaricando il modello preferito, ideale un modello da 7B, in formato "gguf". Una volta scaricato, spostalo nella cartella 'models' e rinominalo in 'model.gguf'. Infine, avvia il server e aggiorna l'URL del server FHIR e la chiave per OpenAI nella sezione utente.
+
+Username: admin
+Password: qwerty

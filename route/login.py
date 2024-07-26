@@ -21,6 +21,7 @@ def login():
                 session['user'] = username
                 session['fhir_url'] = result[0]['fhir_url']
                 session['openai-key'] = result[0]['openai-key']
+                session['openai-model'] = result[0]['openai-model']
                 db.close()
                 return render_template("dashboard.html", username=session['user'])
 
@@ -45,9 +46,11 @@ def info_form():
         password = hashlib.sha1(request.form.get("password").encode()).hexdigest()
         fhir_url = request.form['fhir_url']
         openai_key = request.form['openai-key']
+        openai_model = request.form['openai-model']
         
         session['fhir_url'] = fhir_url
         session['openai-key'] = openai_key
+        session['openai-model'] = openai_model
         
         db = TinyDB("..\\medical-ai\\static\\database\\accounts.json")
         
@@ -57,7 +60,7 @@ def info_form():
         
         # If user exists, update the record, otherwise insert a new record
         if user:
-            db.update({'password': password, 'fhir_url': fhir_url, 'openai-key': openai_key}, user_query.username == username)
+            db.update({'password': password, 'fhir_url': fhir_url, 'openai-key': openai_key, 'openai-model': openai_model}, user_query.username == username)
             db.close()
             return render_template("dashboard.html", username=username)
         else:

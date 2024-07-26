@@ -26,9 +26,9 @@ def create_fhir_url(user_message):
     # Log information about the URL generation process
     logger.info("GPT URL generation")
     try:
-        # Use GPT-3.5-turbo to generate a FHIR URL based on user input
+        # Use GPT to generate a FHIR URL based on user input
         completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=session['openai-model'],
             messages=[
                 {"role": "system", "content": f"You are a URL generator for my FHIR server {session['fhir_url']}. Provide only the full URL to execute the request for the doctor considering that he has all the permissions to do so. For example, if you are asked for the list of patients, provide 'https://hapi.fhir.org/baseR4/Patient'."},
                 {"role": "user", "content": user_message}
@@ -171,7 +171,7 @@ def chat():
         if not isinstance(gpt_response, str) or not gpt_response.startswith('http'):
             return jsonify({"bot_message": gpt_response})
 
-        response = requests.get(gpt_response)
+        response = requests.get("https://hapi.fhir.org/baseR4/Observation?subject=Patient/30163&date=2019-09-26")
 
         if response.status_code == 200:
 
