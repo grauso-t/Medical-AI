@@ -1,38 +1,40 @@
 
 # 👨🏻‍⚕️ Medical-AI
 
-Un assistente virtuale che si interfaccia con un server FHIR al fine di tradurre le risposte in formato JSON in una rappresentazione testuale comprensibile.
+A virtual assistant that interfaces with a FHIR server to translate JSON-formatted responses into an understandable textual representation.
 
 
-## Architettura del Sistema
+## System Architecture
 
-![Architettura](https://raw.githubusercontent.com/grauso-t/medical-ai/main/Screenshot/architettura.jpg)
+![System Architecture](https://raw.githubusercontent.com/grauso-t/medical-ai/main/Screenshot/architettura.jpg)
 
-Dopo aver effettuato l'accesso al sistema e inviato una richiesta all'assistente virtuale, questa verrà inoltrata al server.
+After logging into the system and sending a request to the virtual assistant, the request will be forwarded to the server.
 
-Il modello GPT-3.5-Turno elaborerà la richiesta, trasformandola in una richiesta compatibile con un server FHIR. Una volta ricevuta la risposta JSON, essa verrà elaborata localmente utilizzando il modello Mistral 7B oppure verrà generato un grafico tramite la libreria Chart.js.
+The GPT-3.5-Turbo model will process the request, transforming it into a format compatible with a FHIR server. Once the JSON response is received, it will be processed locally using the Mistral 7B model or a graph will be generated through the Chart.js library.
 
-Infine, la risposta sarà inviata al client per la visualizzazione da parte dell'utente.
+Finally, the response will be sent to the client for user visualization.
+
+
 ## 📽️ Demo
 
-Una volta effettuato l'accesso, verrà visualizzata la dashboard. Per accedere all'assistente virtuale, utilizzare il pulsante situato in basso.
+After logging in, the dashboard will be displayed. To access the virtual assistant, use the button located at the bottom.
 
 ![Dashboard](https://raw.githubusercontent.com/grauso-t/medical-ai/main/Screenshot/dashboard.png)
 
-All'assistente virtuale è possibile formulare richieste in linguaggio naturale, come ad esempio: la lista dei pazienti, le informazioni personali di un determinato paziente, la lista degli appuntamenti, ecc.
+You can ask the virtual assistant questions in natural language, such as: the list of patients, personal information about a specific patient, the list of appointments, etc.
 
 ![Virtual Assistant](https://raw.githubusercontent.com/grauso-t/medical-ai/main/Screenshot/virtual-assistant.png)
 
-Di seguito sono presentate alcune possibili risposte da parte dell'assistente virtuale.
+Below are some example responses from the virtual assistant.
 
 ![Example](https://raw.githubusercontent.com/grauso-t/medical-ai/main/Screenshot/example.png)
 
 ![Graph](https://raw.githubusercontent.com/grauso-t/medical-ai/main/Screenshot/graph.png)
 ## ⚙️ Deployment
 
-Per utilizzare l'applicazione, basta scaricare le dipendenze elencate nel file 'requirements.txt'.
+To use the application, simply download the dependencies listed in the 'requirements.txt' file.
 
-Successivamente, procedi scaricando il modello preferito, ideale un modello da 7B, in formato "gguf". Una volta scaricato, spostalo nella cartella 'models' e rinominalo in 'model.gguf'. Infine, avvia il server e aggiorna l'URL del server FHIR e la chiave per OpenAI nella sezione utente.
+Then, download your preferred model — ideally a 7B model — in "gguf" format. Once downloaded, move it to the 'models' folder and rename it to 'model.gguf'. Finally, start the server and update the FHIR server URL and the OpenAI key in the user settings.
 
 Username: admin
 Password: qwerty
