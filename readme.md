@@ -1,40 +1,54 @@
-
 # 👨🏻‍⚕️ Medical-AI
 
-A virtual assistant that interfaces with a FHIR server to translate JSON-formatted responses into an understandable textual representation.
+Un assistente virtuale che si interfaccia con un server FHIR per tradurre risposte in formato JSON in una rappresentazione testuale comprensibile.
 
 
-## System Architecture
+## Architettura di Sistema
 
 ![System Architecture](https://raw.githubusercontent.com/grauso-t/medical-ai/main/Screenshot/architettura.jpg)
 
-After logging into the system and sending a request to the virtual assistant, the request will be forwarded to the server.
+Dopo aver effettuato l’accesso al sistema ed inviato una richiesta all’assistente virtuale, questa verrà inoltrata al server.
 
-The GPT-3.5-Turbo model will process the request, transforming it into a format compatible with a FHIR server. Once the JSON response is received, it will be processed locally using the Mistral 7B model or a graph will be generated through the Chart.js library.
+Il modello GPT-3.5-Turbo elaborerà la richiesta trasformandola in un formato compatibile con un server FHIR. Una volta ricevuta la risposta in JSON, questa verrà elaborata localmente tramite il modello Mistral 7B oppure verrà generato un grafico tramite la libreria Chart.js.
 
-Finally, the response will be sent to the client for user visualization.
+Infine, la risposta verrà inviata al client per la visualizzazione da parte dell’utente.
 
 
 ## 📽️ Demo
 
-After logging in, the dashboard will be displayed. To access the virtual assistant, use the button located at the bottom.
+Dopo l’accesso, verrà mostrata la dashboard. Per accedere all’assistente virtuale, utilizzare il pulsante situato in basso.
 
 ![Dashboard](https://raw.githubusercontent.com/grauso-t/medical-ai/main/Screenshot/dashboard.png)
 
-You can ask the virtual assistant questions in natural language, such as: the list of patients, personal information about a specific patient, the list of appointments, etc.
+È possibile porre domande in linguaggio naturale, ad esempio: la lista dei pazienti, le informazioni personali di un paziente specifico, la lista degli appuntamenti, ecc.
 
 ![Virtual Assistant](https://raw.githubusercontent.com/grauso-t/medical-ai/main/Screenshot/virtual-assistant.png)
 
-Below are some example responses from the virtual assistant.
+Qui sotto sono riportati alcuni esempi di risposte fornite dall’assistente virtuale.
 
 ![Example](https://raw.githubusercontent.com/grauso-t/medical-ai/main/Screenshot/example.png)
 
-![Graph](https://raw.githubusercontent.com/grauso-t/medical-ai/main/Screenshot/graph.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/grauso-t/medical-ai/main/Screenshot/graph.png" alt="Graph" width="500"/>
+</p>
+
+
 ## ⚙️ Deployment
 
-To use the application, simply download the dependencies listed in the 'requirements.txt' file.
+Per utilizzare l’applicazione, è sufficiente scaricare le dipendenze elencate nel file `requirements.txt`.
 
-Then, download your preferred model — ideally a 7B model — in "gguf" format. Once downloaded, move it to the 'models' folder and rename it to 'model.gguf'. Finally, start the server and update the FHIR server URL and the OpenAI key in the user settings.
+Successivamente, scaricare il modello preferito — idealmente un modello da 7B — in formato "gguf". Una volta scaricato, spostarlo nella cartella `models` e rinominarlo in `model.gguf`. Infine, avviare il server e aggiornare l’URL del server FHIR e la chiave OpenAI nelle impostazioni utente.
 
-Username: admin
-Password: qwerty
+Username: `admin`  
+Password: `qwerty`  
+
+
+## 📚 Pubblicazioni Scientifiche
+
+Questa repository è stata la base di due pubblicazioni scientifiche:
+
+- **A Multi-Agent Architecture for Privacy-Preserving Natural Language Interaction with FHIR-Based Electronic Health Records**  
+  DOI: [https://doi.org/10.23919/SoftCOM62040.2024.10721684](https://doi.org/10.23919/SoftCOM62040.2024.10721684)
+
+- **Privacy-Preserving Healthcare Data Interactions: A Multi-Agent Approach Using LLMs**  
+  DOI: [https://doi.org/10.24138/jcomss-2024-0119](https://doi.org/10.24138/jcomss-2024-0119)
