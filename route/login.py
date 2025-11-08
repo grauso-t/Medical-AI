@@ -52,7 +52,7 @@ def info_form():
         session['openai-key'] = openai_key
         session['openai-model'] = openai_model
         
-        db = TinyDB("..\\medical-ai\\static\\database\\accounts.json")
+        db = TinyDB("./static/database/accounts.json")
         
         # Check if the user exists
         user_query = Query()
