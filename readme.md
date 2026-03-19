@@ -1,4 +1,4 @@
-# 👨🏻‍⚕️ Medical-AI
+# Medical-AI
 
 Un assistente virtuale che si interfaccia con un server FHIR per tradurre risposte in formato JSON in una rappresentazione testuale comprensibile.
 
@@ -14,7 +14,7 @@ Il modello GPT-3.5-Turbo elaborerà la richiesta trasformandola in un formato co
 Infine, la risposta verrà inviata al client per la visualizzazione da parte dell’utente.
 
 
-## 📽️ Demo
+## Demo
 
 Dopo l’accesso, verrà mostrata la dashboard. Per accedere all’assistente virtuale, utilizzare il pulsante situato in basso.
 
@@ -33,7 +33,7 @@ Qui sotto sono riportati alcuni esempi di risposte fornite dall’assistente vir
 </p>
 
 
-## ⚙️ Deployment
+## Deployment
 
 Per utilizzare l’applicazione, è sufficiente scaricare le dipendenze elencate nel file `requirements.txt`.
 
@@ -43,7 +43,7 @@ Username: `admin`
 Password: `qwerty`  
 
 
-## 📚 Pubblicazioni Scientifiche
+## Pubblicazioni Scientifiche
 
 Questa repository è stata la base di due pubblicazioni scientifiche:
 
